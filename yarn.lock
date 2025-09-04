@@ -267,6 +267,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.14.8, @babel/runtime@npm:^7.21.0":
+  version: 7.28.3
+  resolution: "@babel/runtime@npm:7.28.3"
+  checksum: 10c0/b360f82c2c5114f2a062d4d143d7b4ec690094764853937110585a9497977aed66c102166d0e404766c274e02a50ffb8f6d77fef7251ecf3f607f0e03e6397bc
+  languageName: node
+  linkType: hard
+
 "@babel/template@npm:^7.27.2":
   version: 7.27.2
   resolution: "@babel/template@npm:7.27.2"
@@ -1475,6 +1482,24 @@ __metadata:
   peerDependencies:
     "@testing-library/dom": ">=7.21.4"
   checksum: 10c0/75fea130a52bf320d35d46ed54f3eec77e71a56911b8b69a3fe29497b0b9947b2dc80d30f04054ad4ce7f577856ae3e5397ea7dff0ef14944d3909784c7a93fe
+  languageName: node
+  linkType: hard
+
+"@toss/utility-types@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "@toss/utility-types@npm:1.2.1"
+  checksum: 10c0/03323f3ff7a3b4ef97fd6b02f8c6ff01252e8f78b9888fea8ff1c1dc3615d945f02a12d5c7585ee9debba5e394bb63ca1dbe3e8cd843c7fce30935c72ea3797d
+  languageName: node
+  linkType: hard
+
+"@toss/utils@npm:^1.6.1":
+  version: 1.6.1
+  resolution: "@toss/utils@npm:1.6.1"
+  dependencies:
+    "@babel/runtime": "npm:^7.14.8"
+    "@toss/utility-types": "npm:^1.2.1"
+    date-fns: "npm:^2.25.0"
+  checksum: 10c0/3869e9f420344159ffe6e2dd612d95c9978d66f106a401c4ba2f6df7403311406eef41e0da68030b93be149d82f153d588fc1568d354cb1c2eca5878bcd36620
   languageName: node
   linkType: hard
 
@@ -3505,6 +3530,15 @@ __metadata:
     es-errors: "npm:^1.3.0"
     is-data-view: "npm:^1.0.1"
   checksum: 10c0/fa7aa40078025b7810dcffc16df02c480573b7b53ef1205aa6a61533011005c1890e5ba17018c692ce7c900212b547262d33279fde801ad9843edc0863bf78c4
+  languageName: node
+  linkType: hard
+
+"date-fns@npm:^2.25.0":
+  version: 2.30.0
+  resolution: "date-fns@npm:2.30.0"
+  dependencies:
+    "@babel/runtime": "npm:^7.21.0"
+  checksum: 10c0/e4b521fbf22bc8c3db332bbfb7b094fd3e7627de0259a9d17c7551e2d2702608a7307a449206065916538e384f37b181565447ce2637ae09828427aed9cb5581
   languageName: node
   linkType: hard
 
@@ -5737,6 +5771,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:^6.6.4"
     "@testing-library/react": "npm:^16.3.0"
     "@testing-library/user-event": "npm:^14.6.1"
+    "@toss/utils": "npm:^1.6.1"
     "@types/jest": "npm:^30.0.0"
     "@types/react": "npm:^19.1.8"
     "@types/react-dom": "npm:^19.1.6"

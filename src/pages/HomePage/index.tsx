@@ -15,7 +15,7 @@ function HomePage() {
     <>
       <BannerSection />
       <CurrentLevelSection />
-      <RecentPurchaseSection />
+      <RecentPurchaseSection exchangeRate={exchangeRate?.[currency] || 0} currency={currency} />
       <ProductListSection />
     </>
   );
