@@ -9,6 +9,19 @@ interface RecentPurchaseSectionProps {
   currency: CurrencyType;
 }
 
+const formatPrice = (price: number, currency: CurrencyType) => {
+  let symbol = '';
+  if (currency === 'USD') {
+    symbol = '$';
+  } else if (currency === 'KRW') {
+    symbol = '원';
+  }
+
+  const formattedPrice = currency === 'KRW' ? Math.round(price) : price;
+
+  return `${currency === 'USD' ? symbol : ''}${commaizeNumber(formattedPrice)} ${currency === 'KRW' ? '원' : ''}`;
+}
+
 function RecentPurchaseSection({ exchangeRate, currency }: RecentPurchaseSectionProps) {
   const { data: recentProducts } = useQuery(recentProductsQueryOptions());
 
@@ -47,7 +60,7 @@ function RecentPurchaseSection({ exchangeRate, currency }: RecentPurchaseSection
             />
             <Flex flexDir="column" gap={1}>
               <Text variant="B2_Medium">{product.name}</Text>
-              <Text variant="H1_Bold">{`${currency === 'USD' ? '$' : ''}${commaizeNumber(product.price * exchangeRate)}`}{currency === 'KRW' ? '원' : ''}</Text>
+              <Text variant="H1_Bold">{formatPrice(product.price * exchangeRate, currency)}</Text>
             </Flex>
           </Flex>
         ))}
