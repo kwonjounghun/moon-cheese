@@ -7,19 +7,41 @@ interface ShoppingCartStore {
   getCountByProductId: (productId: number) => number;
   removeProduct: (productId: number) => void;
   addProduct: (productId: number, count: number) => void;
+  clearShoppingCart: () => void;
 }
 
 const useShoppingCartStore = create<ShoppingCartStore>((set, get) => ({
   shoppingCart: {},
   getCountByProductId: (productId) => get().shoppingCart[productId] || 0,
-  addCountByProductId: (productId) => set((state) => ({ shoppingCart: { ...state.shoppingCart, [productId]: (state.shoppingCart[productId] || 0) + 1 } })),
-  minusCountByProductId: (productId) => set((state) => ({ shoppingCart: { ...state.shoppingCart, [productId]: (state.shoppingCart[productId] || 0) - 1 } })),
+  addCountByProductId: (productId) => set((state) => {
+    const newShoppingCart = { ...state.shoppingCart };
+    newShoppingCart[productId] = (newShoppingCart[productId] || 0) + 1;
+
+    return { shoppingCart: newShoppingCart };
+  }),
+  minusCountByProductId: (productId) => set((state) => {
+    const newShoppingCart = { ...state.shoppingCart };
+    newShoppingCart[productId] = (newShoppingCart[productId] || 0) - 1;
+
+    if (newShoppingCart[productId] < 1) {
+      delete newShoppingCart[productId];
+    }
+
+    return { shoppingCart: newShoppingCart };
+  }),
   removeProduct: (productId) => set((state) => {
     const newShoppingCart = { ...state.shoppingCart };
     delete newShoppingCart[productId];
+
     return { shoppingCart: newShoppingCart };
   }),
-  addProduct: (productId, count) => set((state) => ({ shoppingCart: { ...state.shoppingCart, [productId]: (state.shoppingCart[productId] || 0) + count } })),
+  addProduct: (productId, count) => set((state) => {
+    const newShoppingCart = { ...state.shoppingCart };
+    newShoppingCart[productId] = (newShoppingCart[productId] || 0) + count;
+
+    return { shoppingCart: newShoppingCart };
+  }),
+  clearShoppingCart: () => set({ shoppingCart: {} }),
 }));
 
 export default useShoppingCartStore;
