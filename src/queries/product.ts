@@ -10,8 +10,11 @@ export type RecentProduct = {
 
 
 const queryKeys = {
-  recentProducts: () => ['recent', 'products'],
-  productList: () => ['products'],
+  all: () => ['products'],
+  recent: () => ['products', 'recent'],
+  List: () => ['products', 'list'],
+  Detail: (id: number) => ['products', id],
+  recommendList: (id: number) => ['products', id, 'recommend'],
 };
 
 const getRecentProducts = async () => {
@@ -21,7 +24,7 @@ const getRecentProducts = async () => {
 
 export const recentProductsQueryOptions = () => {
   return queryOptions({
-    queryKey: queryKeys.recentProducts(),
+    queryKey: queryKeys.recent(),
     queryFn: getRecentProducts,
   });
 };
@@ -72,7 +75,35 @@ const getProductList = async () => {
 
 export const productListQueryOptions = () => {
   return queryOptions({
-    queryKey: queryKeys.productList(),
+    queryKey: queryKeys.List(),
     queryFn: getProductList,
+  });
+};
+
+const getProductDetail = async (id: number) => {
+  const response = await http.get<Product>(`/api/product/${id}`);
+  return response;
+};
+
+export const productDetailQueryOptions = (id: number) => {
+  return queryOptions({
+    queryKey: queryKeys.Detail(id),
+    queryFn: () => getProductDetail(id),
+  });
+};
+
+interface RecommendProductList {
+  recommendProductIds: number[];
+}
+
+const getRecommendProductList = async (id: number) => {
+  const response = await http.get<RecommendProductList>(`/api/product/recommend/${id}`);
+  return response.recommendProductIds;
+};
+
+export const recommendProductListQueryOptions = (id: number) => {
+  return queryOptions({
+    queryKey: queryKeys.recommendList(id),
+    queryFn: () => getRecommendProductList(id),
   });
 };

@@ -3,39 +3,63 @@ import ProductDetailSection from "./components/ProductDetailSection";
 import ProductInfoSection from "./components/ProductInfoSection";
 import RecommendationSection from "./components/RecommendationSection";
 import ThumbnailSection from "./components/ThumbnailSection";
+import { useCurrencyStore } from "@/stores/currency";
+import { exchangeRateQueryOptions } from "@/queries/exchangeRate";
+import { useQueryErrorResetBoundary, useSuspenseQuery } from "@tanstack/react-query";
+import { productDetailQueryOptions } from "@/queries/product";
+import { useParams } from "react-router";
+import { capitalize } from 'es-toolkit'
+import { type TagType } from "@/ui-lib/components/tag";
+import ErrorSection from "@/components/ErrorSection";
+import { AsyncBoundary } from "@toss/async-boundary";
 
 function ProductDetailPage() {
-	return (
-		<>
-			<ThumbnailSection
-				images={[
-					"/moon-cheese-images/cracker-1-1.jpg",
-					"/moon-cheese-images/cracker-1-2.jpg",
-					"/moon-cheese-images/cracker-1-3.jpg",
-					"/moon-cheese-images/cracker-1-4.jpg",
-				]}
-			/>
-			<ProductInfoSection
-				name={"치즈홀 크래커"}
-				category={"cracker"}
-				rating={4.0}
-				price={10.85}
-				quantity={2}
-			/>
+  const { id } = useParams();
+  const { currency } = useCurrencyStore();
+  const { reset: resetQuery } = useQueryErrorResetBoundary();
+  const handleRetry = (reset: () => void) => {
+    resetQuery();
+    reset();
+  }
 
-			<Spacing size={2.5} />
+  const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
+  const exchangeRate = exchangeRateMap[currency];
+  const { data: product } = useSuspenseQuery(productDetailQueryOptions(Number(id)));
 
-			<ProductDetailSection
-				description={
-					'"달 표면에서 가 수확한 특별한 구멍낸 크래커." 달의 분화구를 연상시키는 다지한과 고소한 풍미가 특징인 크래커. 치즈와의 궁합을 고려한 절묘한 비율로, 어느 데어링 메뉴도 잘 어울립니다.'
-				}
-			/>
+  return (
+    <>
+      <ThumbnailSection
+        images={product.images}
+      />
+      <ProductInfoSection
+        name={product.name}
+        category={capitalize(product.category) as TagType}
+        rating={product.rating}
+        price={product.price * exchangeRate}
+        quantity={product.stock}
+        currency={currency}
+        id={product.id}
+        stock={product.stock}
+      />
 
-			<Spacing size={2.5} />
+      <Spacing size={2.5} />
 
-			<RecommendationSection />
-		</>
-	);
+      <ProductDetailSection
+        description={
+          product.detailDescription
+        }
+      />
+
+      <Spacing size={2.5} />
+
+      <AsyncBoundary
+        pendingFallback={<div>Loading...</div>}
+        rejectedFallback={({ reset }) => <ErrorSection onRetry={() => { handleRetry(reset) }} />}
+      >
+        <RecommendationSection />
+      </AsyncBoundary>
+    </>
+  );
 }
 
 export default ProductDetailPage;

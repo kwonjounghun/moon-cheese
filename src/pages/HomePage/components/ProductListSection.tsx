@@ -1,29 +1,21 @@
-import { SubGNB, Text, type CurrencyType } from "@/ui-lib";
+import { SubGNB, Text } from "@/ui-lib";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Box, Grid, styled } from "styled-system/jsx";
 import { exchangeRateQueryOptions } from "@/queries/exchangeRate";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useCurrencyStore } from "@/stores/currency";
-import { commaizeNumber } from "@toss/utils";
+import { formatPrice } from "@/utils/price";
 import { isProductCheese, isProductCracker, isProductTea, productListQueryOptions } from "@/queries/product";
 import useShoppingCartStore from "@/stores/shoppingCart";
 import ProductCrackerItem from "./ProductCrackerItem";
 import ProductTeaItem from "./ProductTeaItem";
 import ProductCheeseItem from "./ProductCheeseItem";
 
-const formatPrice = (price: number, currency: CurrencyType) => {
-  switch (currency) {
-    case 'USD':
-      return `$${commaizeNumber(price)}`;
-    case 'KRW':
-      return `${commaizeNumber(Math.round(price))}원`;
-  }
-}
 
 function ProductListSection() {
   const navigate = useNavigate();
-  const { shoppingCart, addToShoppingCart, removeFromShoppingCart } = useShoppingCartStore();
+  const { shoppingCart, addCountByProductId, minusCountByProductId } = useShoppingCartStore();
   const { currency } = useCurrencyStore();
   const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
   const { data: productList } = useSuspenseQuery(productListQueryOptions());
@@ -61,13 +53,13 @@ function ProductListSection() {
       <Grid gridTemplateColumns="repeat(2, 1fr)" rowGap={9} columnGap={4} p={5}>
         {filteredProductList.map(product => {
           if (isProductCheese(product)) {
-            return <ProductCheeseItem product={product} handleClickProduct={handleClickProduct} removeFromShoppingCart={removeFromShoppingCart} addToShoppingCart={addToShoppingCart} shoppingCart={shoppingCart} price={formatPrice(exchangeRate * product.price, currency)} />
+            return <ProductCheeseItem product={product} handleClickProduct={handleClickProduct} minusProduct={minusCountByProductId} addProduct={addCountByProductId} count={shoppingCart[product.id] || 0} price={formatPrice(exchangeRate * product.price, currency)} />
           }
           if (isProductCracker(product)) {
-            return <ProductCrackerItem product={product} handleClickProduct={handleClickProduct} removeFromShoppingCart={removeFromShoppingCart} addToShoppingCart={addToShoppingCart} shoppingCart={shoppingCart} price={formatPrice(exchangeRate * product.price, currency)} />
+            return <ProductCrackerItem product={product} handleClickProduct={handleClickProduct} minusProduct={minusCountByProductId} addProduct={addCountByProductId} count={shoppingCart[product.id] || 0} price={formatPrice(exchangeRate * product.price, currency)} />
           }
           if (isProductTea(product)) {
-            return <ProductTeaItem product={product} handleClickProduct={handleClickProduct} removeFromShoppingCart={removeFromShoppingCart} addToShoppingCart={addToShoppingCart} shoppingCart={shoppingCart} price={formatPrice(exchangeRate * product.price, currency)} />
+            return <ProductTeaItem product={product} handleClickProduct={handleClickProduct} minusProduct={minusCountByProductId} addProduct={addCountByProductId} count={shoppingCart[product.id] || 0} price={formatPrice(exchangeRate * product.price, currency)} />
           }
           return null;
         })}
