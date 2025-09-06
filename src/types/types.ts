@@ -1,0 +1,1 @@
+export type GradeType = 'EXPLORER' | 'PILOT' | 'COMMANDER';

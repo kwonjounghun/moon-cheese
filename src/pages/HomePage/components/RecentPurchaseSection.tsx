@@ -1,67 +1,73 @@
 import { Flex, styled } from "styled-system/jsx";
-import { Spacing, Text } from "@/ui-lib";
+import { Spacing, Text, type CurrencyType } from "@/ui-lib";
+import { recentProductsQueryOptions } from "@/queries/product";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { commaizeNumber } from "@toss/utils";
+import { exchangeRateQueryOptions } from "@/queries/exchangeRate";
+import { useCurrencyStore } from "@/stores/currency";
+
+const formatPrice = (price: number, currency: CurrencyType) => {
+  let symbol = '';
+  if (currency === 'USD') {
+    symbol = '$';
+  } else if (currency === 'KRW') {
+    symbol = '원';
+  }
+
+  const formattedPrice = currency === 'KRW' ? Math.round(price) : price;
+
+  return `${currency === 'USD' ? symbol : ''}${commaizeNumber(formattedPrice)} ${currency === 'KRW' ? '원' : ''}`;
+}
 
 function RecentPurchaseSection() {
-	return (
-		<styled.section css={{ px: 5, pt: 4, pb: 8 }}>
-			<Text variant="H1_Bold">최근 구매한 상품</Text>
+  const { currency } = useCurrencyStore();
+  const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
+  const { data: recentProducts } = useSuspenseQuery(recentProductsQueryOptions());
 
-			<Spacing size={4} />
+  const exchangeRate = exchangeRateMap[currency];
 
-			<Flex
-				css={{
-					bg: "background.01_white",
-					px: 5,
-					py: 4,
-					gap: 4,
-					rounded: "2xl",
-				}}
-				direction={"column"}
-			>
-				<Flex
-					css={{
-						gap: 4,
-					}}
-				>
-					<styled.img
-						src="/moon-cheese-images/cheese-1-1.jpg"
-						alt="item"
-						css={{
-							w: "60px",
-							h: "60px",
-							objectFit: "cover",
-							rounded: "xl",
-						}}
-					/>
-					<Flex flexDir="column" gap={1}>
-						<Text variant="B2_Medium">월레스의 오리지널 웬슬리데일</Text>
-						<Text variant="H1_Bold">$12.99</Text>
-					</Flex>
-				</Flex>
+  return (
+    <styled.section css={{ px: 5, pt: 4, pb: 8 }}>
+      <Text variant="H1_Bold">최근 구매한 상품</Text>
 
-				<Flex
-					css={{
-						gap: 4,
-					}}
-				>
-					<styled.img
-						src="/moon-cheese-images/cheese-2-1.jpg"
-						alt="item"
-						css={{
-							w: "60px",
-							h: "60px",
-							objectFit: "cover",
-							rounded: "xl",
-						}}
-					/>
-					<Flex flexDir="column" gap={1}>
-						<Text variant="B2_Medium">그랜드 데이 아웃 체다</Text>
-						<Text variant="H1_Bold">$14.87</Text>
-					</Flex>
-				</Flex>
-			</Flex>
-		</styled.section>
-	);
+      <Spacing size={4} />
+
+      <Flex
+        css={{
+          bg: "background.01_white",
+          px: 5,
+          py: 4,
+          gap: 4,
+          rounded: "2xl",
+        }}
+        direction={"column"}
+      >
+        {recentProducts?.map((product) => (
+          <Flex
+            key={product.id}
+            css={{
+              gap: 4,
+            }}
+          >
+            <styled.img
+              src={product.thumbnail}
+              alt="item"
+              css={{
+                w: "60px",
+                h: "60px",
+                objectFit: "cover",
+                rounded: "xl",
+              }}
+            />
+            <Flex flexDir="column" gap={1}>
+              <Text variant="B2_Medium">{product.name}</Text>
+              <Text variant="H1_Bold">{formatPrice(product.price * exchangeRate, currency)}</Text>
+            </Flex>
+          </Flex>
+        ))}
+      </Flex>
+    </styled.section>
+  );
 }
 
 export default RecentPurchaseSection;

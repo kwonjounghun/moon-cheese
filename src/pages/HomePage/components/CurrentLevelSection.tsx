@@ -1,37 +1,46 @@
 import { Box, Flex, styled } from "styled-system/jsx";
 import { ProgressBar, Spacing, Text } from "@/ui-lib";
+import { meQueryOptions } from "@/queries/me";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { pointQueryOptions } from "@/queries/point";
 
 function CurrentLevelSection() {
-	return (
-		<styled.section css={{ px: 5, py: 4 }}>
-			<Text variant="H1_Bold">현재 등급</Text>
+  const { data: me } = useSuspenseQuery(meQueryOptions());
+  const { data: point } = useSuspenseQuery(pointQueryOptions());
 
-			<Spacing size={4} />
+  const minPoint = point.find((point) => point.type === me.grade)?.minPoint || 0;
+  const progress = me.point ? Math.min(me.point / minPoint, 1) : 0;
+  const remainingPointToNextLevel = minPoint - me.point;
 
-			<Box bg="background.01_white" css={{ px: 5, py: 4, rounded: "2xl" }}>
-				<Flex flexDir="column" gap={2}>
-					<Text variant="H2_Bold">Explorer</Text>
+  return (
+    <styled.section css={{ px: 5, py: 4 }}>
+      <Text variant="H1_Bold">현재 등급</Text>
 
-					<ProgressBar value={0.6} size="xs" />
+      <Spacing size={4} />
 
-					<Flex justifyContent="space-between">
-						<Box textAlign="left">
-							<Text variant="C1_Bold">현재 포인트</Text>
-							<Text variant="C2_Regular" color="neutral.03_gray">
-								6p
-							</Text>
-						</Box>
-						<Box textAlign="right">
-							<Text variant="C1_Bold">다음 등급까지</Text>
-							<Text variant="C2_Regular" color="neutral.03_gray">
-								1.5p
-							</Text>
-						</Box>
-					</Flex>
-				</Flex>
-			</Box>
-		</styled.section>
-	);
+      <Box bg="background.01_white" css={{ px: 5, py: 4, rounded: "2xl" }}>
+        <Flex flexDir="column" gap={2}>
+          <Text variant="H2_Bold">Explorer</Text>
+
+          <ProgressBar value={progress} size="xs" />
+
+          <Flex justifyContent="space-between">
+            <Box textAlign="left">
+              <Text variant="C1_Bold">현재 포인트</Text>
+              <Text variant="C2_Regular" color="neutral.03_gray">
+                {me.point}p
+              </Text>
+            </Box>
+            <Box textAlign="right">
+              <Text variant="C1_Bold">다음 등급까지</Text>
+              <Text variant="C2_Regular" color="neutral.03_gray">
+                {remainingPointToNextLevel}p </Text>
+            </Box>
+          </Flex>
+        </Flex>
+      </Box>
+    </styled.section>
+  );
 }
 
 export default CurrentLevelSection;
