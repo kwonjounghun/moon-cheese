@@ -1,19 +1,12 @@
 import { Flex, styled } from "styled-system/jsx";
-import { Spacing, Text, type CurrencyType } from "@/ui-lib";
+import { Spacing, Text } from "@/ui-lib";
 import { recentProductsQueryOptions } from "@/queries/product";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { commaizeNumber } from "@toss/utils";
 import { exchangeRateQueryOptions } from "@/queries/exchangeRate";
 import { useCurrencyStore } from "@/stores/currency";
+import { formatPrice } from "@/utils/price";
 
-const formatPrice = (price: number, currency: CurrencyType) => {
-  switch (currency) {
-    case 'USD':
-      return `$${commaizeNumber(price)}`;
-    case 'KRW':
-      return `${commaizeNumber(Math.round(price))}원`;
-  }
-}
+
 
 function RecentPurchaseSection() {
   const { currency } = useCurrencyStore();

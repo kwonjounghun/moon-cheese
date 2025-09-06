@@ -1,25 +1,17 @@
-import { SubGNB, Text, type CurrencyType } from "@/ui-lib";
+import { SubGNB, Text } from "@/ui-lib";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Box, Grid, styled } from "styled-system/jsx";
 import { exchangeRateQueryOptions } from "@/queries/exchangeRate";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useCurrencyStore } from "@/stores/currency";
-import { commaizeNumber } from "@toss/utils";
+import { formatPrice } from "@/utils/price";
 import { isProductCheese, isProductCracker, isProductTea, productListQueryOptions } from "@/queries/product";
 import useShoppingCartStore from "@/stores/shoppingCart";
 import ProductCrackerItem from "./ProductCrackerItem";
 import ProductTeaItem from "./ProductTeaItem";
 import ProductCheeseItem from "./ProductCheeseItem";
 
-const formatPrice = (price: number, currency: CurrencyType) => {
-  switch (currency) {
-    case 'USD':
-      return `$${commaizeNumber(price)}`;
-    case 'KRW':
-      return `${commaizeNumber(Math.round(price))}원`;
-  }
-}
 
 function ProductListSection() {
   const navigate = useNavigate();
