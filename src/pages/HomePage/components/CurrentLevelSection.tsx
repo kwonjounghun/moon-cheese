@@ -2,7 +2,7 @@ import { Box, Flex, styled } from "styled-system/jsx";
 import { ProgressBar, Spacing, Text } from "@/ui-lib";
 import { meQueryOptions } from "@/queries/me";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { pointQueryOptions } from "@/queries/point";
+import { pointQueryOptions } from "@/queries/grade";
 
 function CurrentLevelSection() {
   const { data: me } = useSuspenseQuery(meQueryOptions());
