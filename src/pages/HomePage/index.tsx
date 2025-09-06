@@ -1,21 +1,27 @@
-import { exchangeRateQueryOptions } from "@/queries/exchangeRate";
 import BannerSection from "./components/BannerSection";
 import CurrentLevelSection from "./components/CurrentLevelSection";
 import ProductListSection from "./components/ProductListSection";
 import RecentPurchaseSection from "./components/RecentPurchaseSection";
-import { useCurrencyStore } from "@/stores/currency";
-import { useQuery } from "@tanstack/react-query";
+import { AsyncBoundary } from "@toss/async-boundary";
+import ErrorSection from "@/components/ErrorSection";
+import { useQueryErrorResetBoundary } from "@tanstack/react-query";
 
 function HomePage() {
-  const { currency } = useCurrencyStore();
-  const { data: exchangeRate } = useQuery(exchangeRateQueryOptions());
+  const { reset: resetQuery } = useQueryErrorResetBoundary();
+  const handleRetry = (reset: () => void) => {
+    resetQuery();
+    reset();
+  }
 
-  console.log(exchangeRate);
   return (
     <>
       <BannerSection />
-      <CurrentLevelSection />
-      <RecentPurchaseSection exchangeRate={exchangeRate?.[currency] || 0} currency={currency} />
+      <AsyncBoundary pendingFallback={<div>Loading...</div>} rejectedFallback={({ reset }) => <ErrorSection onRetry={() => handleRetry(reset)} />}  >
+        <CurrentLevelSection />
+      </AsyncBoundary>
+      <AsyncBoundary pendingFallback={<div>Loading...</div>} rejectedFallback={({ reset }) => <ErrorSection onRetry={() => handleRetry(reset)} />}  >
+        <RecentPurchaseSection />
+      </AsyncBoundary>
       <ProductListSection />
     </>
   );

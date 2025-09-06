@@ -1,13 +1,10 @@
 import { Flex, styled } from "styled-system/jsx";
 import { Spacing, Text, type CurrencyType } from "@/ui-lib";
 import { recentProductsQueryOptions } from "@/queries/product";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { commaizeNumber } from "@toss/utils";
-
-interface RecentPurchaseSectionProps {
-  exchangeRate: number;
-  currency: CurrencyType;
-}
+import { exchangeRateQueryOptions } from "@/queries/exchangeRate";
+import { useCurrencyStore } from "@/stores/currency";
 
 const formatPrice = (price: number, currency: CurrencyType) => {
   let symbol = '';
@@ -22,8 +19,12 @@ const formatPrice = (price: number, currency: CurrencyType) => {
   return `${currency === 'USD' ? symbol : ''}${commaizeNumber(formattedPrice)} ${currency === 'KRW' ? '원' : ''}`;
 }
 
-function RecentPurchaseSection({ exchangeRate, currency }: RecentPurchaseSectionProps) {
-  const { data: recentProducts } = useQuery(recentProductsQueryOptions());
+function RecentPurchaseSection() {
+  const { currency } = useCurrencyStore();
+  const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
+  const { data: recentProducts } = useSuspenseQuery(recentProductsQueryOptions());
+
+  const exchangeRate = exchangeRateMap[currency];
 
   return (
     <styled.section css={{ px: 5, pt: 4, pb: 8 }}>
