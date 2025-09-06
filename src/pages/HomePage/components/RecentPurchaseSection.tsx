@@ -7,16 +7,12 @@ import { exchangeRateQueryOptions } from "@/queries/exchangeRate";
 import { useCurrencyStore } from "@/stores/currency";
 
 const formatPrice = (price: number, currency: CurrencyType) => {
-  let symbol = '';
-  if (currency === 'USD') {
-    symbol = '$';
-  } else if (currency === 'KRW') {
-    symbol = '원';
+  switch (currency) {
+    case 'USD':
+      return `$${commaizeNumber(price)}`;
+    case 'KRW':
+      return `${commaizeNumber(Math.round(price))}원`;
   }
-
-  const formattedPrice = currency === 'KRW' ? Math.round(price) : price;
-
-  return `${currency === 'USD' ? symbol : ''}${commaizeNumber(formattedPrice)} ${currency === 'KRW' ? '원' : ''}`;
 }
 
 function RecentPurchaseSection() {
