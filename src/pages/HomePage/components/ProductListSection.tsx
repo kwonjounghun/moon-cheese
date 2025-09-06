@@ -15,7 +15,7 @@ import ProductCheeseItem from "./ProductCheeseItem";
 
 function ProductListSection() {
   const navigate = useNavigate();
-  const { shoppingCart, addToShoppingCart, removeFromShoppingCart } = useShoppingCartStore();
+  const { shoppingCart, addCountByProductId, minusCountByProductId } = useShoppingCartStore();
   const { currency } = useCurrencyStore();
   const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
   const { data: productList } = useSuspenseQuery(productListQueryOptions());
@@ -53,13 +53,13 @@ function ProductListSection() {
       <Grid gridTemplateColumns="repeat(2, 1fr)" rowGap={9} columnGap={4} p={5}>
         {filteredProductList.map(product => {
           if (isProductCheese(product)) {
-            return <ProductCheeseItem product={product} handleClickProduct={handleClickProduct} removeFromShoppingCart={removeFromShoppingCart} addToShoppingCart={addToShoppingCart} shoppingCart={shoppingCart} price={formatPrice(exchangeRate * product.price, currency)} />
+            return <ProductCheeseItem product={product} handleClickProduct={handleClickProduct} minusProduct={minusCountByProductId} addProduct={addCountByProductId} count={shoppingCart[product.id] || 0} price={formatPrice(exchangeRate * product.price, currency)} />
           }
           if (isProductCracker(product)) {
-            return <ProductCrackerItem product={product} handleClickProduct={handleClickProduct} removeFromShoppingCart={removeFromShoppingCart} addToShoppingCart={addToShoppingCart} shoppingCart={shoppingCart} price={formatPrice(exchangeRate * product.price, currency)} />
+            return <ProductCrackerItem product={product} handleClickProduct={handleClickProduct} minusProduct={minusCountByProductId} addProduct={addCountByProductId} count={shoppingCart[product.id] || 0} price={formatPrice(exchangeRate * product.price, currency)} />
           }
           if (isProductTea(product)) {
-            return <ProductTeaItem product={product} handleClickProduct={handleClickProduct} removeFromShoppingCart={removeFromShoppingCart} addToShoppingCart={addToShoppingCart} shoppingCart={shoppingCart} price={formatPrice(exchangeRate * product.price, currency)} />
+            return <ProductTeaItem product={product} handleClickProduct={handleClickProduct} minusProduct={minusCountByProductId} addProduct={addCountByProductId} count={shoppingCart[product.id] || 0} price={formatPrice(exchangeRate * product.price, currency)} />
           }
           return null;
         })}

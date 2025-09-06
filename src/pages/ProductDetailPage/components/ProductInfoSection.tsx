@@ -2,6 +2,8 @@ import { Button, Counter, RatingGroup, Spacing, Text, type CurrencyType } from "
 import Tag, { type TagType } from "@/ui-lib/components/tag";
 import { Box, Divider, Flex, Stack, styled } from "styled-system/jsx";
 import { formatPrice } from "@/utils/price";
+import { useState } from "react";
+import useShoppingCartStore from "@/stores/shoppingCart";
 
 type ProductInfoSectionProps = {
   name: string;
@@ -10,9 +12,32 @@ type ProductInfoSectionProps = {
   price: number;
   quantity: number;
   currency: CurrencyType;
+  stock: number;
+  id: number;
 };
 
-function ProductInfoSection({ name, category, rating, price, quantity, currency }: ProductInfoSectionProps) {
+function ProductInfoSection({ id, name, category, rating, price, quantity, currency, stock }: ProductInfoSectionProps) {
+  const { getCountByProductId, removeProduct, addProduct } = useShoppingCartStore();
+  const [count, setCount] = useState(getCountByProductId(id));
+
+  const hasProductInShoppingCart = getCountByProductId(id) > 0;
+
+  const handleAddCount = () => {
+    setCount(count + 1);
+  }
+  const handleRemoveCount = () => {
+    setCount(count - 1);
+  }
+
+  const handleShoppingCart = () => {
+    if (hasProductInShoppingCart) {
+      removeProduct(id);
+    } else {
+      addProduct(id, count);
+    }
+  }
+
+
   return (
     <styled.section css={{ bg: "background.01_white", p: 5 }}>
       {/* 상품 정보 */}
@@ -38,17 +63,17 @@ function ProductInfoSection({ name, category, rating, price, quantity, currency 
           </Text>
         </Flex>
         <Counter.Root>
-          <Counter.Minus onClick={() => { }} disabled={true} />
-          <Counter.Display value={3} />
-          <Counter.Plus onClick={() => { }} />
+          <Counter.Minus onClick={() => { handleRemoveCount() }} disabled={count === 0} />
+          <Counter.Display value={count} />
+          <Counter.Plus onClick={() => { handleAddCount() }} disabled={count === stock} />
         </Counter.Root>
       </Flex>
 
       <Spacing size={5} />
 
       {/* 장바구니 버튼 */}
-      <Button fullWidth color="primary" size="lg">
-        장바구니
+      <Button fullWidth color="primary" size="lg" onClick={handleShoppingCart}>
+        {hasProductInShoppingCart ? '장바구니에서 제거' : '장바구니 담기'}
       </Button>
     </styled.section>
   );

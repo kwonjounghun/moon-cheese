@@ -8,6 +8,7 @@ import { exchangeRateQueryOptions } from "@/queries/exchangeRate";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { productDetailQueryOptions } from "@/queries/product";
 import { useParams } from "react-router";
+import { capitalize } from 'es-toolkit'
 import { type TagType } from "@/ui-lib/components/tag";
 
 function ProductDetailPage() {
@@ -24,11 +25,13 @@ function ProductDetailPage() {
       />
       <ProductInfoSection
         name={product.name}
-        category={product.category.toLowerCase() as TagType}
+        category={capitalize(product.category) as TagType}
         rating={product.rating}
         price={product.price * exchangeRate}
         quantity={product.stock}
         currency={currency}
+        id={product.id}
+        stock={product.stock}
       />
 
       <Spacing size={2.5} />

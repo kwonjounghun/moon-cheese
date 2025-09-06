@@ -7,13 +7,13 @@ import type { ProductCheese } from "@/queries/product";
 interface ProductCheeseItemProps {
   product: ProductCheese;
   handleClickProduct: (productId: number) => void;
-  removeFromShoppingCart: (productId: number) => void;
-  addToShoppingCart: (productId: number) => void;
-  shoppingCart: { [productId: number]: number };
+  minusProduct: (productId: number) => void;
+  addProduct: (productId: number) => void;
+  count: number;
   price: string;
 }
 
-const ProductCheeseItem = ({ product, handleClickProduct, removeFromShoppingCart, addToShoppingCart, shoppingCart, price }: ProductCheeseItemProps) => {
+const ProductCheeseItem = ({ product, handleClickProduct, minusProduct, addProduct, count, price }: ProductCheeseItemProps) => {
   return <ProductItem.Root onClick={() => handleClickProduct(product.id)}>
     <ProductItem.Image src={product.images[0]} alt={product.name} />
     <ProductItem.Info
@@ -27,9 +27,9 @@ const ProductCheeseItem = ({ product, handleClickProduct, removeFromShoppingCart
       </ProductItem.MetaLeft>
     </ProductItem.Meta>
     <Counter.Root>
-      <Counter.Minus onClick={() => { removeFromShoppingCart(product.id) }} disabled={shoppingCart[product.id] === 0} />
-      <Counter.Display value={shoppingCart[product.id] || 0} />
-      <Counter.Plus onClick={() => { addToShoppingCart(product.id) }} disabled={product.stock === shoppingCart[product.id]} />
+      <Counter.Minus onClick={() => { minusProduct(product.id) }} disabled={count === 0} />
+      <Counter.Display value={count} />
+      <Counter.Plus onClick={() => { addProduct(product.id) }} disabled={product.stock === count} />
     </Counter.Root>
   </ProductItem.Root>;
 };
