@@ -1,86 +1,79 @@
-import { Counter, SubGNB, Text } from "@/ui-lib";
-import { useState } from "react";
+import { SubGNB, Text, type CurrencyType } from "@/ui-lib";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Box, Grid, styled } from "styled-system/jsx";
-import ProductItem from "../components/ProductItem";
+import { exchangeRateQueryOptions } from "@/queries/exchangeRate";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useCurrencyStore } from "@/stores/currency";
+import { commaizeNumber } from "@toss/utils";
+import { isProductCheese, isProductCracker, isProductTea, productListQueryOptions } from "@/queries/product";
+import useShoppingCartStore from "@/stores/shoppingCart";
+import ProductCrackerItem from "./ProductCrackerItem";
+import ProductTeaItem from "./ProductTeaItem";
+import ProductCheeseItem from "./ProductCheeseItem";
+
+const formatPrice = (price: number, currency: CurrencyType) => {
+  switch (currency) {
+    case 'USD':
+      return `$${commaizeNumber(price)}`;
+    case 'KRW':
+      return `${commaizeNumber(Math.round(price))}원`;
+  }
+}
 
 function ProductListSection() {
-    const [currentTab, setCurrentTab] = useState("all");
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { shoppingCart, addToShoppingCart, removeFromShoppingCart } = useShoppingCartStore();
+  const { currency } = useCurrencyStore();
+  const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
+  const { data: productList } = useSuspenseQuery(productListQueryOptions());
+  const [currentTab, setCurrentTab] = useState("all");
 
-    const handleClickProduct = (productId: number) => {
-        navigate(`/product/${productId}`);
-    };
+  const filteredProductList = useMemo(() => {
+    return productList.filter(product => {
+      if (currentTab === 'all') return true;
+      if (currentTab === 'cheese') return isProductCheese(product);
+      if (currentTab === 'cracker') return isProductCracker(product);
+      if (currentTab === 'tea') return isProductTea(product);
+    });
+  }, [productList, currentTab]);
 
-    return (
-        <styled.section bg="background.01_white">
-            <Box css={{ px: 5, pt: 5, pb: 4 }}>
-                <Text variant="H1_Bold">판매중인 상품</Text>
-            </Box>
-            <SubGNB.Root value={currentTab} onValueChange={details => setCurrentTab(details.value)}>
-                <SubGNB.List>
-                    <SubGNB.Trigger value="all">전체</SubGNB.Trigger>
-                    <SubGNB.Trigger value="cheese">치즈</SubGNB.Trigger>
-                    <SubGNB.Trigger value="cracker">크래커</SubGNB.Trigger>
-                    <SubGNB.Trigger value="tea">티</SubGNB.Trigger>
-                </SubGNB.List>
-            </SubGNB.Root>
-            <Grid gridTemplateColumns="repeat(2, 1fr)" rowGap={9} columnGap={4} p={5}>
-                <ProductItem.Root onClick={() => handleClickProduct(1)}>
-                    <ProductItem.Image src="/moon-cheese-images/cheese-1-1.jpg" alt="월레스의 오리지널 웬슬리데일" />
-                    <ProductItem.Info
-                        title="월레스의 오리지널 웬슬리데일"
-                        description="월레스가 아침마다 찾는 바로 그 치즈!"
-                    />
-                    <ProductItem.Meta>
-                        <ProductItem.MetaLeft>
-                            <ProductItem.Rating rating={4} />
-                            <ProductItem.Price>$12.99</ProductItem.Price>
-                        </ProductItem.MetaLeft>
-                    </ProductItem.Meta>
-                    <Counter.Root>
-                        <Counter.Minus onClick={() => {}} disabled={true} />
-                        <Counter.Display value={3} />
-                        <Counter.Plus onClick={() => {}} />
-                    </Counter.Root>
-                </ProductItem.Root>
+  const exchangeRate = exchangeRateMap[currency];
 
-                <ProductItem.Root onClick={() => handleClickProduct(2)}>
-                    <ProductItem.Image src="/moon-cheese-images/cracker-1-1.jpg" alt="로봇 크런치 비스킷" />
-                    <ProductItem.Info title="로봇 크런치 비스킷" description="로봇 캐릭터 모양의 귀리 비스킷" />
-                    <ProductItem.Meta>
-                        <ProductItem.MetaLeft>
-                            <ProductItem.Rating rating={3} />
-                            <ProductItem.Price>5.00</ProductItem.Price>
-                        </ProductItem.MetaLeft>
-                        <ProductItem.FreeTag type="gluten" />
-                    </ProductItem.Meta>
-                    <Counter.Root>
-                        <Counter.Minus onClick={() => {}} disabled={true} />
-                        <Counter.Display value={3} />
-                        <Counter.Plus onClick={() => {}} />
-                    </Counter.Root>
-                </ProductItem.Root>
 
-                <ProductItem.Root onClick={() => handleClickProduct(3)}>
-                    <ProductItem.Image src="/moon-cheese-images/tea-1-1.jpg" alt="문라이트 카모마일 티" />
-                    <ProductItem.Info title="문라이트 카모마일 티" description="달빛 같은 부드러운 허브차" />
-                    <ProductItem.Meta>
-                        <ProductItem.MetaLeft>
-                            <ProductItem.Rating rating={5} />
-                            <ProductItem.Price>$7.00</ProductItem.Price>
-                        </ProductItem.MetaLeft>
-                        <ProductItem.FreeTag type="caffeine" />
-                    </ProductItem.Meta>
-                    <Counter.Root>
-                        <Counter.Minus onClick={() => {}} disabled={true} />
-                        <Counter.Display value={3} />
-                        <Counter.Plus onClick={() => {}} />
-                    </Counter.Root>
-                </ProductItem.Root>
-            </Grid>
-        </styled.section>
-    );
+  const handleClickProduct = (productId: number) => {
+    navigate(`/product/${productId}`);
+  };
+
+  return (
+    <styled.section bg="background.01_white">
+      <Box css={{ px: 5, pt: 5, pb: 4 }}>
+        <Text variant="H1_Bold">판매중인 상품</Text>
+      </Box>
+      <SubGNB.Root value={currentTab} onValueChange={details => setCurrentTab(details.value)}>
+        <SubGNB.List>
+          <SubGNB.Trigger value="all">전체</SubGNB.Trigger>
+          <SubGNB.Trigger value="cheese">치즈</SubGNB.Trigger>
+          <SubGNB.Trigger value="cracker">크래커</SubGNB.Trigger>
+          <SubGNB.Trigger value="tea">티</SubGNB.Trigger>
+        </SubGNB.List>
+      </SubGNB.Root>
+      <Grid gridTemplateColumns="repeat(2, 1fr)" rowGap={9} columnGap={4} p={5}>
+        {filteredProductList.map(product => {
+          if (isProductCheese(product)) {
+            return <ProductCheeseItem product={product} handleClickProduct={handleClickProduct} removeFromShoppingCart={removeFromShoppingCart} addToShoppingCart={addToShoppingCart} shoppingCart={shoppingCart} price={formatPrice(exchangeRate * product.price, currency)} />
+          }
+          if (isProductCracker(product)) {
+            return <ProductCrackerItem product={product} handleClickProduct={handleClickProduct} removeFromShoppingCart={removeFromShoppingCart} addToShoppingCart={addToShoppingCart} shoppingCart={shoppingCart} price={formatPrice(exchangeRate * product.price, currency)} />
+          }
+          if (isProductTea(product)) {
+            return <ProductTeaItem product={product} handleClickProduct={handleClickProduct} removeFromShoppingCart={removeFromShoppingCart} addToShoppingCart={addToShoppingCart} shoppingCart={shoppingCart} price={formatPrice(exchangeRate * product.price, currency)} />
+          }
+          return null;
+        })}
+      </Grid>
+    </styled.section>
+  );
 }
 
 export default ProductListSection;

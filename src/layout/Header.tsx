@@ -6,10 +6,17 @@ import { useLocation, useNavigate } from "react-router";
 import { Flex, styled } from "styled-system/jsx";
 import { flex } from "styled-system/patterns";
 import { useCurrencyStore } from "@/stores/currency";
+import useShoppingCartStore from "@/stores/shoppingCart";
+import { useMemo } from "react";
 
 export function Header() {
-  const { currency, setCurrency } = useCurrencyStore();
   const location = useLocation();
+  const { currency, setCurrency } = useCurrencyStore();
+  const { shoppingCart } = useShoppingCartStore();
+
+  const totalItems = useMemo(() => {
+    return Object.values(shoppingCart).reduce((acc, curr) => acc + curr, 0);
+  }, [shoppingCart]);
 
   const isRootRoute = location.pathname === "/";
 
@@ -29,7 +36,7 @@ export function Header() {
       {isRootRoute ? <Logo /> : <BackButton />}
       <Flex alignItems="center" gap={4}>
         <CurrencyToggle value={currency} onValueChange={setCurrency} />
-        <ShoppingCartButton />
+        <ShoppingCartButton totalItems={totalItems} />
       </Flex>
     </styled.header>
   );
@@ -45,12 +52,12 @@ function BackButton() {
   );
 }
 
-function ShoppingCartButton() {
+function ShoppingCartButton({ totalItems }: { totalItems: number }) {
   const navigate = useNavigate();
 
   return (
     <Badge
-      content={9}
+      content={totalItems}
       size="sm"
       cursor="pointer"
       onClick={() => navigate("/shopping-cart")}

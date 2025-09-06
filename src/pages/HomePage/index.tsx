@@ -22,7 +22,9 @@ function HomePage() {
       <AsyncBoundary pendingFallback={<div>Loading...</div>} rejectedFallback={({ reset }) => <ErrorSection onRetry={() => handleRetry(reset)} />}  >
         <RecentPurchaseSection />
       </AsyncBoundary>
-      <ProductListSection />
+      <AsyncBoundary pendingFallback={<div>Loading...</div>} rejectedFallback={({ reset }) => <ErrorSection onRetry={() => handleRetry(reset)} />}  >
+        <ProductListSection />
+      </AsyncBoundary >
     </>
   );
 }
