@@ -8,13 +8,14 @@ import { meQueryOptions } from "@/queries/me";
 import { useCurrencyStore } from "@/stores/currency";
 import { exchangeRateQueryOptions } from "@/queries/exchangeRate";
 import { formatPrice } from "@/utils/price";
-
+import { type DeliveryType } from "@/types/types";
 interface DeliveryMethodSectionProps {
   totalPrice: number;
   onChangeShippingFee: (shippingFee: number) => void;
+  onChangeDeliveryType: (deliveryType: DeliveryType) => void;
 }
 
-function DeliveryMethodSection({ totalPrice, onChangeShippingFee }: DeliveryMethodSectionProps) {
+function DeliveryMethodSection({ totalPrice, onChangeShippingFee, onChangeDeliveryType }: DeliveryMethodSectionProps) {
   const { currency } = useCurrencyStore();
   const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
   const exchangeRate = exchangeRateMap[currency];
@@ -23,16 +24,19 @@ function DeliveryMethodSection({ totalPrice, onChangeShippingFee }: DeliveryMeth
   const { data: me } = useSuspenseQuery(meQueryOptions());
 
   const [selectedDeliveryMethod, setSelectedDeliveryMethod] =
-    useState<string>("Express");
+    useState<DeliveryType>("EXPRESS");
   const selectedDelivery = gradeShipping.find((shipping) => shipping.type === me.grade) as GradeShipping;
 
 
   const isFreeShipping = totalPrice >= selectedDelivery.freeShippingThreshold;
   const premiumFreeShipping = isFreeShipping ? 0 : selectedDelivery.shippingFee;
 
-  useEffect(() => {
-    onChangeShippingFee(selectedDeliveryMethod === "Express" ? 0 : premiumFreeShipping);
-  }, [selectedDeliveryMethod, premiumFreeShipping, onChangeShippingFee]);
+
+  const handleChangeDeliveryType = (deliveryType: DeliveryType) => {
+    setSelectedDeliveryMethod(deliveryType);
+    onChangeDeliveryType(deliveryType);
+    onChangeShippingFee(deliveryType === "EXPRESS" ? 0 : premiumFreeShipping);
+  };
 
   return (
     <styled.section css={{ p: 5, bgColor: "background.01_white" }}>
@@ -47,8 +51,8 @@ function DeliveryMethodSection({ totalPrice, onChangeShippingFee }: DeliveryMeth
           icon={<DeliveryIcon size={28} />}
           price={0}
           currency={currency}
-          isSelected={selectedDeliveryMethod === "Express"}
-          onClick={() => setSelectedDeliveryMethod("Express")}
+          isSelected={selectedDeliveryMethod === "EXPRESS"}
+          onClick={() => handleChangeDeliveryType("EXPRESS")}
         />
         <DeliveryItem
           title="Premium"
@@ -56,8 +60,8 @@ function DeliveryMethodSection({ totalPrice, onChangeShippingFee }: DeliveryMeth
           icon={<RocketIcon size={28} />}
           price={premiumFreeShipping * exchangeRate}
           currency={currency}
-          isSelected={selectedDeliveryMethod === "Premium"}
-          onClick={() => setSelectedDeliveryMethod("Premium")}
+          isSelected={selectedDeliveryMethod === "PREMIUM"}
+          onClick={() => handleChangeDeliveryType("PREMIUM")}
         />
       </Stack>
     </styled.section>

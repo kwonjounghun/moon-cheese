@@ -7,10 +7,12 @@ import { useNavigate } from "react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { productListQueryOptions } from "@/queries/product";
+import { type DeliveryType } from "@/types/types";
 
 function ShoppingCartPage() {
   const navigate = useNavigate();
   const [shippingFee, setShippingFee] = useState(0);
+  const [deliveryType, setDeliveryType] = useState<DeliveryType>("EXPRESS");
 
   const { shoppingCart } = useShoppingCartStore();
   const { data: productList } = useSuspenseQuery(productListQueryOptions());
@@ -37,8 +39,8 @@ function ShoppingCartPage() {
   return (
     <>
       <ShoppingCartSection />
-      <DeliveryMethodSection totalPrice={totalPrice} onChangeShippingFee={setShippingFee} />
-      <CheckoutSection totalPrice={totalPrice} shippingFee={shippingFee} />
+      <DeliveryMethodSection totalPrice={totalPrice} onChangeShippingFee={setShippingFee} onChangeDeliveryType={setDeliveryType} />
+      <CheckoutSection totalPrice={totalPrice} shippingFee={shippingFee} deliveryType={deliveryType} />
     </>
   );
 }

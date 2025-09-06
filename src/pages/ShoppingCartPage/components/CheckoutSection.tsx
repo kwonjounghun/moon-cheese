@@ -1,23 +1,24 @@
-import { SECOND } from "@/constants/time";
-import { Button, Spacing, Text, type CurrencyType } from "@/ui-lib";
+import { Button, Spacing, Text } from "@/ui-lib";
 import { toast } from "@/ui-lib/components/toast";
-import { delay } from "@/utils/async";
-import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Box, Divider, Flex, HStack, Stack, styled } from "styled-system/jsx";
 import { formatPrice } from "@/utils/price";
 import { useCurrencyStore } from "@/stores/currency";
 import { exchangeRateQueryOptions } from "@/queries/exchangeRate";
-import { useSuspenseQuery } from "@tanstack/react-query";
-
+import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { purchaseProductsMutationOptions } from "@/queries/product";
+import useShoppingCartStore from "@/stores/shoppingCart";
+import { type DeliveryType } from "@/types/types";
 interface CheckoutSectionProps {
   totalPrice: number;
   shippingFee: number;
+  deliveryType: DeliveryType;
 }
 
-function CheckoutSection({ totalPrice, shippingFee }: CheckoutSectionProps) {
+function CheckoutSection({ totalPrice, shippingFee, deliveryType }: CheckoutSectionProps) {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [isPurchasing, setIsPurchasing] = useState(false);
+  const { shoppingCart, clearShoppingCart } = useShoppingCartStore();
 
   const { currency } = useCurrencyStore();
   const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
@@ -25,13 +26,24 @@ function CheckoutSection({ totalPrice, shippingFee }: CheckoutSectionProps) {
 
   const totalPriceWithShippingFee = totalPrice + shippingFee;
 
+  const { mutate: purchaseProducts, isPending: isPurchasing } = useMutation(purchaseProductsMutationOptions());
+
   const onClickPurchase = async () => {
-    setIsPurchasing(true);
-    await delay(SECOND * 1);
-    setIsPurchasing(false);
-    toast.success("결제가 완료되었습니다.");
-    await delay(SECOND * 2);
-    navigate("/");
+    purchaseProducts({
+      deliveryType,
+      totalPrice: totalPriceWithShippingFee,
+      items: Object.entries(shoppingCart).map(([productId, quantity]) => ({
+        productId: Number(productId),
+        quantity,
+      })),
+    }, {
+      onSuccess: () => {
+        toast.success("결제가 완료되었습니다.");
+        clearShoppingCart();
+        queryClient.resetQueries();
+        navigate("/");
+      },
+    });
   };
 
   return (

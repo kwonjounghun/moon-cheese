@@ -10,7 +10,7 @@ function CurrentLevelSection() {
 
   const minPoint = point.find((point) => point.type === me.grade)?.minPoint || 0;
   const progress = me.point ? Math.min(me.point / minPoint, 1) : 0;
-  const remainingPointToNextLevel = minPoint - me.point;
+  const remainingPointToNextLevel = minPoint - me.point > 0 ? minPoint - me.point : 0;
 
   return (
     <styled.section css={{ px: 5, py: 4 }}>
