@@ -1,5 +1,6 @@
 import { http } from "@/utils/http";
-import { queryOptions } from "@tanstack/react-query";
+import { queryOptions, mutationOptions } from "@tanstack/react-query";
+import { type DeliveryType } from "@/types/types";
 
 export type RecentProduct = {
   id: number;
@@ -105,5 +106,25 @@ export const recommendProductListQueryOptions = (id: number) => {
   return queryOptions({
     queryKey: queryKeys.recommendList(id),
     queryFn: () => getRecommendProductList(id),
+  });
+};
+
+interface PurchaseProductsRequest {
+  deliveryType: DeliveryType,
+  totalPrice: number;
+  items: {
+    productId: number;
+    quantity: number
+  }[]
+}
+
+const purchaseProducts = async (request: PurchaseProductsRequest) => {
+  const response = await http.post<PurchaseProductsRequest, null>('/api/product/purchase', request);
+  return response;
+};
+
+export const purchaseProductsMutationOptions = () => {
+  return mutationOptions({
+    mutationFn: (request: PurchaseProductsRequest) => purchaseProducts(request),
   });
 };

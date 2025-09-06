@@ -2,7 +2,7 @@ import { Box, Flex, styled } from "styled-system/jsx";
 import { ProgressBar, Spacing, Text } from "@/ui-lib";
 import { meQueryOptions } from "@/queries/me";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { pointQueryOptions } from "@/queries/point";
+import { pointQueryOptions } from "@/queries/grade";
 
 function CurrentLevelSection() {
   const { data: me } = useSuspenseQuery(meQueryOptions());
@@ -10,7 +10,7 @@ function CurrentLevelSection() {
 
   const minPoint = point.find((point) => point.type === me.grade)?.minPoint || 0;
   const progress = me.point ? Math.min(me.point / minPoint, 1) : 0;
-  const remainingPointToNextLevel = minPoint - me.point;
+  const remainingPointToNextLevel = minPoint - me.point > 0 ? minPoint - me.point : 0;
 
   return (
     <styled.section css={{ px: 5, py: 4 }}>
