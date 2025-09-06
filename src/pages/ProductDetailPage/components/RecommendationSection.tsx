@@ -1,51 +1,51 @@
 import { Spacing, Text } from "@/ui-lib";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { HStack, styled } from "styled-system/jsx";
 import RecommendationProductItem from "./RecommendationProductItem";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { productListQueryOptions, recommendProductListQueryOptions } from "@/queries/product";
+import { formatPrice } from "@/utils/price";
+import { useCurrencyStore } from "@/stores/currency";
+import { exchangeRateQueryOptions } from "@/queries/exchangeRate";
 
 function RecommendationSection() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const productId = Number(id);
 
-    const handleClickProduct = (productId: number) => {
-        navigate(`/product/${productId}`);
-    };
+  const { currency } = useCurrencyStore();
+  const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
+  const exchangeRate = exchangeRateMap[currency];
 
-    return (
-        <styled.section css={{ bg: "background.01_white", px: 5, pt: 5, pb: 6 }}>
-            <Text variant="H2_Bold">추천 제품</Text>
+  const { data: productList } = useSuspenseQuery(productListQueryOptions());
+  const { data: recommendProductList } = useSuspenseQuery(recommendProductListQueryOptions(productId));
 
-            <Spacing size={4} />
+  const recommendProducts = productList.filter((product) => recommendProductList.includes(product.id));
 
-            <HStack gap={1.5} overflowX="auto">
-                <RecommendationProductItem.Root onClick={() => handleClickProduct(1)}>
-                    <RecommendationProductItem.Image
-                        src="/moon-cheese-images/cheese-1-1.jpg"
-                        alt="월레스의 오리지널 웬슬리데일"
-                    />
-                    <RecommendationProductItem.Info name="월레스의 오리지널 웬슬리데일" rating={4.0} />
-                    <RecommendationProductItem.Price>$12.99</RecommendationProductItem.Price>
-                </RecommendationProductItem.Root>
+  const handleClickProduct = (productId: number) => {
+    navigate(`/product/${productId}`);
+  };
 
-                <RecommendationProductItem.Root onClick={() => handleClickProduct(2)}>
-                    <RecommendationProductItem.Image
-                        src="/moon-cheese-images/tea-1-1.jpg"
-                        alt="그로밋의 잉글리쉬 브렉퍼스트 티"
-                    />
-                    <RecommendationProductItem.Info name="그로밋의 잉글리쉬 브렉퍼스트 티" rating={4.0} />
-                    <RecommendationProductItem.Price>$6.75</RecommendationProductItem.Price>
-                </RecommendationProductItem.Root>
+  return (
+    <styled.section css={{ bg: "background.01_white", px: 5, pt: 5, pb: 6 }}>
+      <Text variant="H2_Bold">추천 제품</Text>
 
-                <RecommendationProductItem.Root onClick={() => handleClickProduct(3)}>
-                    <RecommendationProductItem.Image
-                        src="/moon-cheese-images/cheese-3-1.jpg"
-                        alt="크래이머 블루 치즈"
-                    />
-                    <RecommendationProductItem.Info name="크래이머 블루 치즈" rating={4.0} />
-                    <RecommendationProductItem.Price>$15.75</RecommendationProductItem.Price>
-                </RecommendationProductItem.Root>
-            </HStack>
-        </styled.section>
-    );
+      <Spacing size={4} />
+
+      <HStack gap={1.5} overflowX="auto">
+        {recommendProducts.map((product) => (
+          <RecommendationProductItem.Root key={product.id} onClick={() => handleClickProduct(product.id)}>
+            <RecommendationProductItem.Image
+              src={product.images[0]}
+              alt={product.name}
+            />
+            <RecommendationProductItem.Info name={product.name} rating={product.rating} />
+            <RecommendationProductItem.Price>{formatPrice(product.price * exchangeRate, currency)}</RecommendationProductItem.Price>
+          </RecommendationProductItem.Root>
+        ))}
+      </HStack>
+    </styled.section>
+  );
 }
 
 export default RecommendationSection;
