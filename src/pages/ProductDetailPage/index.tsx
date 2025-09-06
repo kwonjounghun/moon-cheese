@@ -6,28 +6,28 @@ import ThumbnailSection from "./components/ThumbnailSection";
 import { useCurrencyStore } from "@/stores/currency";
 import { exchangeRateQueryOptions } from "@/queries/exchangeRate";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { productDetailQueryOptions } from "@/queries/product";
+import { useParams } from "react-router";
+import { type TagType } from "@/ui-lib/components/tag";
 
 function ProductDetailPage() {
+  const { id } = useParams();
   const { currency } = useCurrencyStore();
   const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
   const exchangeRate = exchangeRateMap[currency];
+  const { data: product } = useSuspenseQuery(productDetailQueryOptions(Number(id)));
 
   return (
     <>
       <ThumbnailSection
-        images={[
-          "/moon-cheese-images/cracker-1-1.jpg",
-          "/moon-cheese-images/cracker-1-2.jpg",
-          "/moon-cheese-images/cracker-1-3.jpg",
-          "/moon-cheese-images/cracker-1-4.jpg",
-        ]}
+        images={product.images}
       />
       <ProductInfoSection
-        name={"치즈홀 크래커"}
-        category={"cracker"}
-        rating={4.0}
-        price={10.85 * exchangeRate}
-        quantity={2}
+        name={product.name}
+        category={product.category.toLowerCase() as TagType}
+        rating={product.rating}
+        price={product.price * exchangeRate}
+        quantity={product.stock}
         currency={currency}
       />
 
@@ -35,7 +35,7 @@ function ProductDetailPage() {
 
       <ProductDetailSection
         description={
-          '"달 표면에서 가 수확한 특별한 구멍낸 크래커." 달의 분화구를 연상시키는 다지한과 고소한 풍미가 특징인 크래커. 치즈와의 궁합을 고려한 절묘한 비율로, 어느 데어링 메뉴도 잘 어울립니다.'
+          product.detailDescription
         }
       />
 

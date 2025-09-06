@@ -12,6 +12,7 @@ export type RecentProduct = {
 const queryKeys = {
   recentProducts: () => ['recent', 'products'],
   productList: () => ['products'],
+  productDetail: (id: number) => ['products', id],
 };
 
 const getRecentProducts = async () => {
@@ -74,5 +75,17 @@ export const productListQueryOptions = () => {
   return queryOptions({
     queryKey: queryKeys.productList(),
     queryFn: getProductList,
+  });
+};
+
+const getProductDetail = async (id: number) => {
+  const response = await http.get<Product>(`/api/product/${id}`);
+  return response;
+};
+
+export const productDetailQueryOptions = (id: number) => {
+  return queryOptions({
+    queryKey: queryKeys.productDetail(id),
+    queryFn: () => getProductDetail(id),
   });
 };
