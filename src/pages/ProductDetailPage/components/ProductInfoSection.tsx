@@ -1,54 +1,44 @@
-import { Button, Counter, RatingGroup, Spacing, Text, type CurrencyType } from "@/ui-lib";
-import Tag, { type TagType } from "@/ui-lib/components/tag";
-import { Box, Divider, Flex, Stack, styled } from "styled-system/jsx";
-import { formatPrice } from "@/utils/price";
-import { useState } from "react";
-import useShoppingCartStore from "@/stores/shoppingCart";
+import { exchangeRateQueryOptions } from '@/queries/exchangeRate';
+import { productDetailQueryOptions } from '@/queries/product';
+import { useCurrencyStore } from '@/stores/currency';
+import useShoppingCartStore from '@/stores/shoppingCart';
+import { Button, Counter, RatingGroup, Spacing, Text } from '@/ui-lib';
+import Tag, { type TagType } from '@/ui-lib/components/tag';
+import { formatPrice } from '@/utils/price';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useParams } from 'react-router';
+import { Box, Divider, Flex, Stack, styled } from 'styled-system/jsx';
 
-type ProductInfoSectionProps = {
-  name: string;
-  category: TagType;
-  rating: number;
-  price: number;
-  quantity: number;
-  currency: CurrencyType;
-  stock: number;
-  id: number;
-};
+function ProductInfoSection() {
+  const { id } = useParams();
+  const productId = Number(id);
 
-function ProductInfoSection({ id, name, category, rating, price, quantity, currency, stock }: ProductInfoSectionProps) {
-  const { getCountByProductId, removeProduct, addProduct } = useShoppingCartStore();
-  const [count, setCount] = useState(getCountByProductId(id));
+  const shoppingCart = useShoppingCartStore(state => state.shoppingCart);
+  const removeProduct = useShoppingCartStore(state => state.removeProduct);
+  const addProduct = useShoppingCartStore(state => state.addProduct);
 
-  const hasProductInShoppingCart = getCountByProductId(id) > 0;
+  const { currency } = useCurrencyStore();
+  const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
+  const exchangeRate = exchangeRateMap[currency];
 
-  const handleAddCount = () => {
-    setCount(count + 1);
-  }
-  const handleRemoveCount = () => {
-    setCount(count - 1);
-  }
+  const { data: product } = useSuspenseQuery(productDetailQueryOptions(productId));
 
-  const handleShoppingCart = () => {
-    if (hasProductInShoppingCart) {
-      removeProduct(id);
-    } else {
-      addProduct(id, count);
-    }
-  }
+  const hasProductInShoppingCart = shoppingCart[productId] !== undefined;
 
+  const [quantity, setQuantity] = useState(shoppingCart[productId] || 0);
 
   return (
-    <styled.section css={{ bg: "background.01_white", p: 5 }}>
+    <styled.section css={{ bg: 'background.01_white', p: 5 }}>
       {/* 상품 정보 */}
       <Box>
         <Stack gap={2}>
-          <Tag type={category} />
-          <Text variant="B1_Bold">{name}</Text>
-          <RatingGroup value={rating} readOnly label={`${rating.toFixed(1)}`} />
+          <Tag type={product.category.toLowerCase() as TagType} />
+          <Text variant="B1_Bold">{product.name}</Text>
+          <RatingGroup value={product.rating} readOnly label={`${product.rating.toFixed(1)}`} />
         </Stack>
         <Spacing size={4} />
-        <Text variant="H1_Bold">{formatPrice(price, currency)}</Text>
+        <Text variant="H1_Bold">{formatPrice(product.price * exchangeRate, currency)}</Text>
       </Box>
 
       <Spacing size={5} />
@@ -63,16 +53,37 @@ function ProductInfoSection({ id, name, category, rating, price, quantity, curre
           </Text>
         </Flex>
         <Counter.Root>
-          <Counter.Minus onClick={() => { handleRemoveCount() }} disabled={count === 0} />
-          <Counter.Display value={count} />
-          <Counter.Plus onClick={() => { handleAddCount() }} disabled={count === stock} />
+          <Counter.Minus
+            onClick={() => {
+              setQuantity(quantity - 1);
+            }}
+            disabled={quantity === 0}
+          />
+          <Counter.Display value={quantity} />
+          <Counter.Plus
+            onClick={() => {
+              setQuantity(quantity + 1);
+            }}
+            disabled={quantity === product.stock}
+          />
         </Counter.Root>
       </Flex>
 
       <Spacing size={5} />
 
       {/* 장바구니 버튼 */}
-      <Button fullWidth color="primary" size="lg" onClick={handleShoppingCart}>
+      <Button
+        fullWidth
+        color="primary"
+        size="lg"
+        onClick={() => {
+          if (hasProductInShoppingCart) {
+            removeProduct({ productId });
+          } else {
+            addProduct({ productId, quantity });
+          }
+        }}
+      >
         {hasProductInShoppingCart ? '장바구니에서 제거' : '장바구니 담기'}
       </Button>
     </styled.section>
