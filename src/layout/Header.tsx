@@ -1,13 +1,14 @@
-import Badge from "@/ui-lib/components/badge";
-import CurrencyToggle from "@/ui-lib/components/currency-toggle";
-import { ArrowLeftIcon, ShoppingCartIcon } from "@/ui-lib/components/icons";
-import Logo from "@/ui-lib/components/logo";
-import { useLocation, useNavigate } from "react-router";
-import { Flex, styled } from "styled-system/jsx";
-import { flex } from "styled-system/patterns";
-import { useCurrencyStore } from "@/stores/currency";
-import useShoppingCartStore from "@/stores/shoppingCart";
-import { useMemo } from "react";
+import { useCurrencyStore } from '@/stores/currency';
+import useShoppingCartStore from '@/stores/shoppingCart';
+import Badge from '@/ui-lib/components/badge';
+import CurrencyToggle from '@/ui-lib/components/currency-toggle';
+import { ArrowLeftIcon, ShoppingCartIcon } from '@/ui-lib/components/icons';
+import Logo from '@/ui-lib/components/logo';
+import { objectValues } from '@toss/utils';
+import { useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router';
+import { Flex, styled } from 'styled-system/jsx';
+import { flex } from 'styled-system/patterns';
 
 export function Header() {
   const location = useLocation();
@@ -15,22 +16,22 @@ export function Header() {
   const { shoppingCart } = useShoppingCartStore();
 
   const totalItems = useMemo(() => {
-    return Object.values(shoppingCart).reduce((acc, curr) => acc + curr, 0);
+    return objectValues(shoppingCart).reduce((acc, curr) => acc + curr, 0);
   }, [shoppingCart]);
 
-  const isRootRoute = location.pathname === "/";
+  const isRootRoute = location.pathname === '/';
 
   return (
     <styled.header
       className={flex({
-        pos: "sticky",
+        pos: 'sticky',
         top: 0,
-        alignItems: "center",
-        justifyContent: "space-between",
+        alignItems: 'center',
+        justifyContent: 'space-between',
         h: 14,
         px: 5,
-        zIndex: "docked",
-        bg: "background.01_white",
+        zIndex: 'docked',
+        bg: 'background.01_white',
       })}
     >
       {isRootRoute ? <Logo /> : <BackButton />}
@@ -56,12 +57,7 @@ function ShoppingCartButton({ totalItems }: { totalItems: number }) {
   const navigate = useNavigate();
 
   return (
-    <Badge
-      content={totalItems}
-      size="sm"
-      cursor="pointer"
-      onClick={() => navigate("/shopping-cart")}
-    >
+    <Badge content={totalItems} size="sm" cursor="pointer" onClick={() => navigate('/shopping-cart')}>
       <ShoppingCartIcon size={22} />
     </Badge>
   );
