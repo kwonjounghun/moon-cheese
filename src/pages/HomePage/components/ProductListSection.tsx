@@ -1,7 +1,4 @@
-import { exchangeRateQueryOptions } from '@/queries/exchangeRate';
 import { isProductCheese, isProductCracker, isProductTea, productListQueryOptions } from '@/queries/product';
-import { useCurrencyStore } from '@/stores/currency';
-import useShoppingCartStore from '@/stores/shoppingCart';
 import { SubGNB, Text } from '@/ui-lib';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
@@ -11,9 +8,6 @@ import ProductCrackerItem from './ProductCrackerItem';
 import ProductTeaItem from './ProductTeaItem';
 
 function ProductListSection() {
-  const { shoppingCart } = useShoppingCartStore();
-  const { currency } = useCurrencyStore();
-  const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
   const { data: productList } = useSuspenseQuery(productListQueryOptions());
   const [currentTab, setCurrentTab] = useState('all');
 
@@ -25,8 +19,6 @@ function ProductListSection() {
       if (currentTab === 'tea') return isProductTea(product);
     });
   }, [productList, currentTab]);
-
-  const exchangeRate = exchangeRateMap[currency];
 
   return (
     <styled.section bg="background.01_white">
