@@ -9,7 +9,7 @@ interface ShoppingCartStore {
   clearShoppingCart: () => void;
 }
 
-const useShoppingCartStore = create<ShoppingCartStore>((set, get) => ({
+const useShoppingCartStore = create<ShoppingCartStore>(set => ({
   shoppingCart: {},
   incrementProduct: ({ productId }: { productId: number }) =>
     set(state => {
