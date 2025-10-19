@@ -1,10 +1,8 @@
-import { exchangeRateQueryOptions } from '@/queries/exchangeRate';
 import type { ProductCracker } from '@/queries/product';
 import { useCurrencyStore } from '@/stores/currency';
 import useShoppingCartStore from '@/stores/shoppingCart';
 import { Counter } from '@/ui-lib';
 import { formatPrice } from '@/utils/price';
-import { useSuspenseQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
 import ProductItem from './ProductItem';
 
@@ -20,9 +18,8 @@ const ProductCrackerItem = ({ product }: ProductCrackerItemProps) => {
   const incrementProduct = useShoppingCartStore(state => state.incrementProduct);
   const quantity = shoppingCart[product.id] || 0;
 
-  const { currency } = useCurrencyStore();
-  const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
-  const exchangeRate = exchangeRateMap[currency];
+  const currency = useCurrencyStore(state => state.currency);
+  const exchangeRate = useCurrencyStore(state => state.exchangeRate[currency]);
 
   return (
     <ProductItem.Root onClick={() => navigate(`/product/${product.id}`)}>
@@ -31,7 +28,7 @@ const ProductCrackerItem = ({ product }: ProductCrackerItemProps) => {
       <ProductItem.Meta>
         <ProductItem.MetaLeft>
           <ProductItem.Rating rating={product.rating} />
-          <ProductItem.Price>{formatPrice(exchangeRate * product.price, currency)}</ProductItem.Price>
+          <ProductItem.Price>{formatPrice(exchangeRate * product.price, { currency })}</ProductItem.Price>
         </ProductItem.MetaLeft>
         {product.isGlutenFree && <ProductItem.FreeTag type="gluten" />}
       </ProductItem.Meta>

@@ -1,4 +1,3 @@
-import { exchangeRateQueryOptions } from '@/queries/exchangeRate';
 import { productListQueryOptions } from '@/queries/product';
 import { useCurrencyStore } from '@/stores/currency';
 import useShoppingCartStore from '@/stores/shoppingCart';
@@ -17,8 +16,7 @@ function ShoppingCartSection() {
   const clearShoppingCart = useShoppingCartStore(state => state.clearShoppingCart);
 
   const { currency } = useCurrencyStore();
-  const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
-  const exchangeRate = exchangeRateMap[currency];
+  const exchangeRate = useCurrencyStore(state => state.exchangeRate[currency]);
 
   const { data: productList } = useSuspenseQuery(productListQueryOptions());
 
@@ -61,7 +59,7 @@ function ShoppingCartSection() {
                   />
                   <ShoppingCartItem.Footer>
                     <ShoppingCartItem.Price>
-                      {formatPrice(product.price * exchangeRate, currency)}
+                      {formatPrice(product.price * exchangeRate, { currency })}
                     </ShoppingCartItem.Price>
                     <Counter.Root>
                       <Counter.Minus

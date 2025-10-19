@@ -1,11 +1,11 @@
-import type { CurrencyType } from "@/ui-lib/components/currency-toggle";
-import { commaizeNumber } from "@toss/utils";
+import type { CurrencyType } from '@/ui-lib/components/currency-toggle';
+import { commaizeNumber } from '@toss/utils';
 
-export const formatPrice = (price: number, currency: CurrencyType) => {
+export const formatPrice = (price: number, { currency }: { currency: CurrencyType }) => {
   switch (currency) {
     case 'USD':
       return `$${commaizeNumber(price)}`;
     case 'KRW':
       return `${commaizeNumber(Math.round(price))}원`;
   }
-}
+};

@@ -1,4 +1,3 @@
-import { exchangeRateQueryOptions } from '@/queries/exchangeRate';
 import { productDetailQueryOptions } from '@/queries/product';
 import { useCurrencyStore } from '@/stores/currency';
 import useShoppingCartStore from '@/stores/shoppingCart';
@@ -18,9 +17,8 @@ function ProductInfoSection() {
   const removeProduct = useShoppingCartStore(state => state.removeProduct);
   const addProduct = useShoppingCartStore(state => state.addProduct);
 
-  const { currency } = useCurrencyStore();
-  const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
-  const exchangeRate = exchangeRateMap[currency];
+  const currency = useCurrencyStore(state => state.currency);
+  const exchangeRate = useCurrencyStore(state => state.exchangeRate[currency]);
 
   const { data: product } = useSuspenseQuery(productDetailQueryOptions(productId));
 
@@ -38,7 +36,7 @@ function ProductInfoSection() {
           <RatingGroup value={product.rating} readOnly label={`${product.rating.toFixed(1)}`} />
         </Stack>
         <Spacing size={4} />
-        <Text variant="H1_Bold">{formatPrice(product.price * exchangeRate, currency)}</Text>
+        <Text variant="H1_Bold">{formatPrice(product.price * exchangeRate, { currency })}</Text>
       </Box>
 
       <Spacing size={5} />
