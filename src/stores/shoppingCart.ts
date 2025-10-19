@@ -7,6 +7,8 @@ interface ShoppingCartStore {
   getCountByProductId: ({ productId }: { productId: number }) => number;
   removeProduct: ({ productId }: { productId: number }) => void;
   addProduct: ({ productId, quantity }: { productId: number; quantity: number }) => void;
+  incrementProduct: ({ productId }: { productId: number }) => void;
+  decrementProduct: ({ productId }: { productId: number }) => void;
   clearShoppingCart: () => void;
 }
 
