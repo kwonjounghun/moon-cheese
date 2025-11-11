@@ -1,14 +1,13 @@
-import { Button, Spacing, Text } from "@/ui-lib";
-import { toast } from "@/ui-lib/components/toast";
-import { useNavigate } from "react-router";
-import { Box, Divider, Flex, HStack, Stack, styled } from "styled-system/jsx";
-import { formatPrice } from "@/utils/price";
-import { useCurrencyStore } from "@/stores/currency";
-import { exchangeRateQueryOptions } from "@/queries/exchangeRate";
-import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { purchaseProductsMutationOptions } from "@/queries/product";
-import useShoppingCartStore from "@/stores/shoppingCart";
-import { type DeliveryType } from "@/types/types";
+import { purchaseProductsMutationOptions } from '@/queries/product';
+import { useCurrencyStore } from '@/stores/currency';
+import useShoppingCartStore from '@/stores/shoppingCart';
+import { type DeliveryType } from '@/types/types';
+import { Button, Spacing, Text } from '@/ui-lib';
+import { toast } from '@/ui-lib/components/toast';
+import { formatPrice } from '@/utils/price';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router';
+import { Box, Divider, Flex, HStack, Stack, styled } from 'styled-system/jsx';
 interface CheckoutSectionProps {
   totalPrice: number;
   shippingFee: number;
@@ -18,36 +17,40 @@ interface CheckoutSectionProps {
 function CheckoutSection({ totalPrice, shippingFee, deliveryType }: CheckoutSectionProps) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { shoppingCart, clearShoppingCart } = useShoppingCartStore();
 
-  const { currency } = useCurrencyStore();
-  const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
-  const exchangeRate = exchangeRateMap[currency];
+  const shoppingCart = useShoppingCartStore(state => state.shoppingCart);
+  const clearShoppingCart = useShoppingCartStore(state => state.clearShoppingCart);
+
+  const currency = useCurrencyStore(state => state.currency);
+  const exchangeRate = useCurrencyStore(state => state.exchangeRate[currency]);
 
   const totalPriceWithShippingFee = totalPrice + shippingFee;
 
   const { mutate: purchaseProducts, isPending: isPurchasing } = useMutation(purchaseProductsMutationOptions());
 
   const onClickPurchase = async () => {
-    purchaseProducts({
-      deliveryType,
-      totalPrice: totalPriceWithShippingFee,
-      items: Object.entries(shoppingCart).map(([productId, quantity]) => ({
-        productId: Number(productId),
-        quantity,
-      })),
-    }, {
-      onSuccess: () => {
-        toast.success("결제가 완료되었습니다.");
-        clearShoppingCart();
-        queryClient.resetQueries();
-        navigate("/");
+    purchaseProducts(
+      {
+        deliveryType,
+        totalPrice: totalPriceWithShippingFee,
+        items: Object.entries(shoppingCart).map(([productId, quantity]) => ({
+          productId: Number(productId),
+          quantity,
+        })),
       },
-    });
+      {
+        onSuccess: () => {
+          toast.success('결제가 완료되었습니다.');
+          clearShoppingCart();
+          queryClient.resetQueries();
+          navigate('/');
+        },
+      }
+    );
   };
 
   return (
-    <styled.section css={{ p: 5, bgColor: "background.01_white" }}>
+    <styled.section css={{ p: 5, bgColor: 'background.01_white' }}>
       <Text variant="H2_Bold">결제금액</Text>
 
       <Spacing size={4} />
@@ -56,24 +59,22 @@ function CheckoutSection({ totalPrice, shippingFee, deliveryType }: CheckoutSect
         gap={6}
         css={{
           p: 5,
-          border: "1px solid",
-          borderColor: "border.01_gray",
-          rounded: "2xl",
+          border: '1px solid',
+          borderColor: 'border.01_gray',
+          rounded: '2xl',
         }}
       >
         <Stack gap={5}>
           <Box gap={3}>
             <Flex justify="space-between">
               <Text variant="B2_Regular">주문금액(3개)</Text>
-              <Text variant="B2_Bold">
-                {formatPrice(totalPrice * exchangeRate, currency)}
-              </Text>
+              <Text variant="B2_Bold">{formatPrice(totalPrice * exchangeRate, { currency })}</Text>
             </Flex>
             <Spacing size={3} />
             <Flex justify="space-between">
               <Text variant="B2_Regular">배송비</Text>
               <Text variant="B2_Bold" color="state.green">
-                {shippingFee === 0 ? "무료배송" : formatPrice(shippingFee * exchangeRate, currency)}
+                {shippingFee === 0 ? '무료배송' : formatPrice(shippingFee * exchangeRate, { currency })}
               </Text>
             </Flex>
           </Box>
@@ -82,17 +83,12 @@ function CheckoutSection({ totalPrice, shippingFee, deliveryType }: CheckoutSect
 
           <HStack justify="space-between">
             <Text variant="H2_Bold">총 금액</Text>
-            <Text variant="H2_Bold">{formatPrice(totalPriceWithShippingFee * exchangeRate, currency)}</Text>
+            <Text variant="H2_Bold">{formatPrice(totalPriceWithShippingFee * exchangeRate, { currency })}</Text>
           </HStack>
         </Stack>
 
-        <Button
-          fullWidth
-          size="lg"
-          loading={isPurchasing}
-          onClick={onClickPurchase}
-        >
-          {isPurchasing ? "결제 중..." : "결제 진행"}
+        <Button fullWidth size="lg" loading={isPurchasing} onClick={onClickPurchase}>
+          {isPurchasing ? '결제 중...' : '결제 진행'}
         </Button>
 
         <Text variant="C2_Regular" color="neutral.03_gray">

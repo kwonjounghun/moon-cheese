@@ -1,25 +1,15 @@
-import { SubGNB, Text } from "@/ui-lib";
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router";
-import { Box, Grid, styled } from "styled-system/jsx";
-import { exchangeRateQueryOptions } from "@/queries/exchangeRate";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { useCurrencyStore } from "@/stores/currency";
-import { formatPrice } from "@/utils/price";
-import { isProductCheese, isProductCracker, isProductTea, productListQueryOptions } from "@/queries/product";
-import useShoppingCartStore from "@/stores/shoppingCart";
-import ProductCrackerItem from "./ProductCrackerItem";
-import ProductTeaItem from "./ProductTeaItem";
-import ProductCheeseItem from "./ProductCheeseItem";
-
+import { isProductCheese, isProductCracker, isProductTea, productListQueryOptions } from '@/queries/product';
+import { SubGNB, Text } from '@/ui-lib';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
+import { Box, Grid, styled } from 'styled-system/jsx';
+import ProductCheeseItem from './ProductCheeseItem';
+import ProductCrackerItem from './ProductCrackerItem';
+import ProductTeaItem from './ProductTeaItem';
 
 function ProductListSection() {
-  const navigate = useNavigate();
-  const { shoppingCart, addCountByProductId, minusCountByProductId } = useShoppingCartStore();
-  const { currency } = useCurrencyStore();
-  const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
   const { data: productList } = useSuspenseQuery(productListQueryOptions());
-  const [currentTab, setCurrentTab] = useState("all");
+  const [currentTab, setCurrentTab] = useState('all');
 
   const filteredProductList = useMemo(() => {
     return productList.filter(product => {
@@ -29,13 +19,6 @@ function ProductListSection() {
       if (currentTab === 'tea') return isProductTea(product);
     });
   }, [productList, currentTab]);
-
-  const exchangeRate = exchangeRateMap[currency];
-
-
-  const handleClickProduct = (productId: number) => {
-    navigate(`/product/${productId}`);
-  };
 
   return (
     <styled.section bg="background.01_white">
@@ -53,13 +36,13 @@ function ProductListSection() {
       <Grid gridTemplateColumns="repeat(2, 1fr)" rowGap={9} columnGap={4} p={5}>
         {filteredProductList.map(product => {
           if (isProductCheese(product)) {
-            return <ProductCheeseItem product={product} handleClickProduct={handleClickProduct} minusProduct={minusCountByProductId} addProduct={addCountByProductId} count={shoppingCart[product.id] || 0} price={formatPrice(exchangeRate * product.price, currency)} />
+            return <ProductCheeseItem product={product} />;
           }
           if (isProductCracker(product)) {
-            return <ProductCrackerItem product={product} handleClickProduct={handleClickProduct} minusProduct={minusCountByProductId} addProduct={addCountByProductId} count={shoppingCart[product.id] || 0} price={formatPrice(exchangeRate * product.price, currency)} />
+            return <ProductCrackerItem product={product} />;
           }
           if (isProductTea(product)) {
-            return <ProductTeaItem product={product} handleClickProduct={handleClickProduct} minusProduct={minusCountByProductId} addProduct={addCountByProductId} count={shoppingCart[product.id] || 0} price={formatPrice(exchangeRate * product.price, currency)} />
+            return <ProductTeaItem product={product} />;
           }
           return null;
         })}

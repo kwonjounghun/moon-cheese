@@ -1,19 +1,15 @@
-import { Flex, styled } from "styled-system/jsx";
-import { Spacing, Text } from "@/ui-lib";
-import { recentProductsQueryOptions } from "@/queries/product";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { exchangeRateQueryOptions } from "@/queries/exchangeRate";
-import { useCurrencyStore } from "@/stores/currency";
-import { formatPrice } from "@/utils/price";
-
-
+import { recentProductsQueryOptions } from '@/queries/product';
+import { useCurrencyStore } from '@/stores/currency';
+import { Spacing, Text } from '@/ui-lib';
+import { formatPrice } from '@/utils/price';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { Flex, styled } from 'styled-system/jsx';
 
 function RecentPurchaseSection() {
-  const { currency } = useCurrencyStore();
-  const { data: exchangeRateMap } = useSuspenseQuery(exchangeRateQueryOptions());
-  const { data: recentProducts } = useSuspenseQuery(recentProductsQueryOptions());
+  const currency = useCurrencyStore(state => state.currency);
+  const exchangeRate = useCurrencyStore(state => state.exchangeRate[currency]);
 
-  const exchangeRate = exchangeRateMap[currency];
+  const { data: recentProducts } = useSuspenseQuery(recentProductsQueryOptions());
 
   return (
     <styled.section css={{ px: 5, pt: 4, pb: 8 }}>
@@ -23,15 +19,15 @@ function RecentPurchaseSection() {
 
       <Flex
         css={{
-          bg: "background.01_white",
+          bg: 'background.01_white',
           px: 5,
           py: 4,
           gap: 4,
-          rounded: "2xl",
+          rounded: '2xl',
         }}
-        direction={"column"}
+        direction={'column'}
       >
-        {recentProducts?.map((product) => (
+        {recentProducts?.map(product => (
           <Flex
             key={product.id}
             css={{
@@ -42,15 +38,15 @@ function RecentPurchaseSection() {
               src={product.thumbnail}
               alt="item"
               css={{
-                w: "60px",
-                h: "60px",
-                objectFit: "cover",
-                rounded: "xl",
+                w: '60px',
+                h: '60px',
+                objectFit: 'cover',
+                rounded: 'xl',
               }}
             />
             <Flex flexDir="column" gap={1}>
               <Text variant="B2_Medium">{product.name}</Text>
-              <Text variant="H1_Bold">{formatPrice(product.price * exchangeRate, currency)}</Text>
+              <Text variant="H1_Bold">{formatPrice(product.price * exchangeRate, { currency })}</Text>
             </Flex>
           </Flex>
         ))}
